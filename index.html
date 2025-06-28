@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bunk Tracker (75% Rule)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #e6f2ff;
+      margin: 0;
+      padding: 30px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #004080;
+      margin-bottom: 25px;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    .subject {
+      margin-bottom: 25px;
+      padding: 20px;
+      background: #f0f8ff;
+      border: 1px solid #dcdcdc;
+      border-radius: 10px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 18px;
+      margin: 10px 5px 0 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      margin-top: 25px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 14px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📘 Bunk Tracker - Maintain 75% Attendance</h2>
+    <div id="subjectsContainer"></div>
+    <button onclick="addSubject()">➕ Add Subject</button>
+    <button onclick="calculateAll()">✅ Submit & Calculate</button>
+    <button onclick="downloadPDF()">📄 Download PDF</button>
+
+    <table id="resultTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Must Attend (Classes)</th>
+          <th>Can Bunk (Classes)</th>
+          <th>Expected Attendance (%)</th>
+        </tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">Made with ❤️ by Anisha</div>
+
+  <script>
+    let subjectCount = 0;
+
+    function addSubject() {
+      const container = document.getElementById('subjectsContainer');
+      const div = document.createElement('div');
+      div.className = 'subject';
+      div.innerHTML = `
+        <label>Subject Name:</label>
+        <input type="text" id="sub${subjectCount}" required>
+        <label>Total Sessions Over Till Date:</label>
+        <input type="number" id="sessionsOver${subjectCount}" required>
+        <label>Sessions Attended Till Date:</label>
+        <input type="number" id="sessionsAttended${subjectCount}" required>
+        <label>Remaining Number of Classes:</label>
+        <input type="number" id="classesLeft${subjectCount}" required>
+      `;
+      container.appendChild(div);
+      subjectCount++;
+    }
+
+    function calculateAll() {
+      const resultTable = document.getElementById("resultTable");
+      const resultBody = document.getElementById("resultBody");
+      resultBody.innerHTML = "";
+
+      for (let i = 0; i < subjectCount; i++) {
+        const subject = document.getElementById(`sub${i}`).value;
+        const sessionsOver = parseInt(document.getElementById(`sessionsOver${i}`).value);
+        const sessionsAttended = parseInt(document.getElementById(`sessionsAttended${i}`).value);
+        const classesLeft = parseInt(document.getElementById(`classesLeft${i}`).value);
+
+        const sessionsLeft = classesLeft * 3;
+        const totalSessions = sessionsOver + sessionsLeft;
+        const minSessionsToAttend = Math.ceil(0.75 * totalSessions);
+        const sessionsToAttend = minSessionsToAttend - sessionsAttended;
+
+        let mustAttendClasses = Math.ceil(sessionsToAttend / 3);
+        let canBunkClasses = classesLeft - mustAttendClasses;
+        if (canBunkClasses < 0) canBunkClasses = 0;
+
+        const finalAttended = sessionsAttended + (classesLeft - canBunkClasses) * 3;
+        const finalPercentage = ((finalAttended / totalSessions) * 100).toFixed(2);
+
+        resultBody.innerHTML += `
+          <tr>
+            <td>${subject}</td>
+            <td>${mustAttendClasses}</td>
+            <td>${canBunkClasses}</td>
+            <td>${finalPercentage}%</td>
+          </tr>
+        `;
+      }
+
+      resultTable.style.display = "table";
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(16);
+      doc.text("Bunk Tracker Report", 15, 15);
+      doc.setFontSize(12);
+
+      let startY = 25;
+
+      for (let i = 0; i < subjectCount; i++) {
+        const subject = document.getElementById(`sub${i}`).value;
+        const sessionsOver = parseInt(document.getElementById(`sessionsOver${i}`).value);
+        const sessionsAttended = parseInt(document.getElementById(`sessionsAttended${i}`).value);
+        const classesLeft = parseInt(document.getElementById(`classesLeft${i}`).value);
+
+        const sessionsLeft = classesLeft * 3;
+        const totalSessions = sessionsOver + sessionsLeft;
+        const minSessionsToAttend = Math.ceil(0.75 * totalSessions);
+        const sessionsToAttend = minSessionsToAttend - sessionsAttended;
+
+        let mustAttendClasses = Math.ceil(sessionsToAttend / 3);
+        let canBunkClasses = classesLeft - mustAttendClasses;
+        if (canBunkClasses < 0) canBunkClasses = 0;
+
+        const finalAttended = sessionsAttended + (classesLeft - canBunkClasses) * 3;
+        const finalPercentage = ((finalAttended / totalSessions) * 100).toFixed(2);
+
+        doc.text(`Subject: ${subject}`, 15, startY);
+        doc.text(`Must Attend (Classes): ${mustAttendClasses}`, 15, startY + 7);
+        doc.text(`Can Bunk (Classes): ${canBunkClasses}`, 15, startY + 14);
+        doc.text(`Expected Attendance: ${finalPercentage}%`, 15, startY + 21);
+        startY += 32;
+      }
+
+      doc.text("Made by Anisha ❤️", 15, startY + 10);
+      doc.save("bunk-tracker-report.pdf");
+    }
+
+    // Add one subject on load
+    addSubject();
+  </script>
+</body>
+</html>
+
+
