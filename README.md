@@ -13,7 +13,7 @@ A simple and smart web application to help students calculate how many classes t
 
 ## 🚀 Live Demo
 
-👉 [Link to Demo (optional)](https://your-live-demo-link.com)
+👉 [Link to Demo (optional)](https://anishahkandachar2002.github.io/bunktracker/)
 
 ## 📷 Screenshot
 
