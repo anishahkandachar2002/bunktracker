@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bunk Tracker (75% Rule)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -118,8 +118,10 @@
         <input type="number" id="sessionsOver${subjectCount}" required>
         <label>Sessions Attended Till Date:</label>
         <input type="number" id="sessionsAttended${subjectCount}" required>
-        <label>Remaining Number of Classes:</label>
-        <input type="number" id="classesLeft${subjectCount}" required>
+        <label>Classes Per Week:</label>
+        <input type="number" id="classesPerWeek${subjectCount}" required>
+        <label>Weeks Remaining:</label>
+        <input type="number" id="weeksRemaining${subjectCount}" required>
       `;
       container.appendChild(div);
       subjectCount++;
@@ -134,18 +136,20 @@
         const subject = document.getElementById(`sub${i}`).value;
         const sessionsOver = parseInt(document.getElementById(`sessionsOver${i}`).value);
         const sessionsAttended = parseInt(document.getElementById(`sessionsAttended${i}`).value);
-        const classesLeft = parseInt(document.getElementById(`classesLeft${i}`).value);
+        const classesPerWeek = parseInt(document.getElementById(`classesPerWeek${i}`).value);
+        const weeksRemaining = parseInt(document.getElementById(`weeksRemaining${i}`).value);
 
-        const sessionsLeft = classesLeft * 3;
+        const remainingClasses = classesPerWeek * weeksRemaining;
+        const sessionsLeft = remainingClasses * 3;
         const totalSessions = sessionsOver + sessionsLeft;
         const minSessionsToAttend = Math.ceil(0.75 * totalSessions);
         const sessionsToAttend = minSessionsToAttend - sessionsAttended;
 
         let mustAttendClasses = Math.ceil(sessionsToAttend / 3);
-        let canBunkClasses = classesLeft - mustAttendClasses;
+        let canBunkClasses = remainingClasses - mustAttendClasses;
         if (canBunkClasses < 0) canBunkClasses = 0;
 
-        const finalAttended = sessionsAttended + (classesLeft - canBunkClasses) * 3;
+        const finalAttended = sessionsAttended + (remainingClasses - canBunkClasses) * 3;
         const finalPercentage = ((finalAttended / totalSessions) * 100).toFixed(2);
 
         resultBody.innerHTML += `
@@ -175,18 +179,20 @@
         const subject = document.getElementById(`sub${i}`).value;
         const sessionsOver = parseInt(document.getElementById(`sessionsOver${i}`).value);
         const sessionsAttended = parseInt(document.getElementById(`sessionsAttended${i}`).value);
-        const classesLeft = parseInt(document.getElementById(`classesLeft${i}`).value);
+        const classesPerWeek = parseInt(document.getElementById(`classesPerWeek${i}`).value);
+        const weeksRemaining = parseInt(document.getElementById(`weeksRemaining${i}`).value);
 
-        const sessionsLeft = classesLeft * 3;
+        const remainingClasses = classesPerWeek * weeksRemaining;
+        const sessionsLeft = remainingClasses * 3;
         const totalSessions = sessionsOver + sessionsLeft;
         const minSessionsToAttend = Math.ceil(0.75 * totalSessions);
         const sessionsToAttend = minSessionsToAttend - sessionsAttended;
 
         let mustAttendClasses = Math.ceil(sessionsToAttend / 3);
-        let canBunkClasses = classesLeft - mustAttendClasses;
+        let canBunkClasses = remainingClasses - mustAttendClasses;
         if (canBunkClasses < 0) canBunkClasses = 0;
 
-        const finalAttended = sessionsAttended + (classesLeft - canBunkClasses) * 3;
+        const finalAttended = sessionsAttended + (remainingClasses - canBunkClasses) * 3;
         const finalPercentage = ((finalAttended / totalSessions) * 100).toFixed(2);
 
         doc.text(`Subject: ${subject}`, 15, startY);
@@ -200,10 +206,8 @@
       doc.save("bunk-tracker-report.pdf");
     }
 
-    // Add one subject on load
+    // Add one subject by default
     addSubject();
   </script>
 </body>
 </html>
-
-
