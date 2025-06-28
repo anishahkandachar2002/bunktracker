@@ -17,7 +17,8 @@ A simple and smart web application to help students calculate how many classes t
 
 ## 📷 Screenshot
 
-![Bunk Tracker UI Screenshot](s1.png)
+![Bunk Tracker UI Screenshot](s1.png)  
+(s2.png)
 
 ## 🛠️ Tech Stack
 
